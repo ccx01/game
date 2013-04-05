@@ -1,3 +1,23 @@
+  /* 对话期间继续加载 */
+var level = [
+["characters/ochi","characters/fs"],
+["atk","beaten","hit"]
+];
+var loaded = 0,
+    imgLen = level[0].length,
+    audioLen = level[1].length;
+for(var m=0;m<imgLen;m++){
+  Sprite(level[0][m],0,0,preloading);
+}
+for(var n=0;n<audioLen;n++){
+  Sound.load(level[1][n],preloading);
+}
+
+function preloading(){
+  loaded++;
+  $("#loading div").stop().animate({width:loaded/(imgLen+audioLen)*100+"%"});
+}
+
 function info(){
   //$(".info").text("ochi:hp "+ochi.HP+" action "+ochi.action+" summon: hp "+node[0].HP+" angry "+node[0].angry+" mode "+node[0].mode);
 
@@ -159,15 +179,6 @@ var player = [];
           this.mouseY=mouseY;
           this.mouseX=mouseX;
           this.move=true;
-          /* cursor */
-/*          $(".moveCur").css({
-            "position":"absolute",
-            "left":curX,
-            "top":curY,
-            "width":22,
-            "height":20,
-            "background": "url(images/ui/cursor.png) -8px -5px no-repeat"
-          });*/
         }
         if(this.move){
             if(this.count==8) this.count=0;
@@ -187,11 +198,7 @@ var player = [];
             this.x += this.xVelocity;
             this.y += this.yVelocity;
           }
-        }/*else{
-          $(".moveCur").css({
-            "background": "url(images/ui/cursor.png) 0px 15px no-repeat"
-          });
-        }*/
+        }
 
 /*        if (keydown.q) {
           //可设置新技能

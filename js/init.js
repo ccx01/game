@@ -1,4 +1,4 @@
-var time=0;
+var time = 0;
 
 var CANVAS_WIDTH = 900;
 var CANVAS_HEIGHT = 600;
@@ -19,11 +19,21 @@ $("#stage").mousemove(function(e){
 });
 
 var FPS = 30;
-var start=setInterval(function() {
-  info();
-  update();
-  draw();
-  time = new Date().getTime();
-}, Math.floor(1000 / FPS));
+var start;
 
+function gameStart(){
+	if(loaded==(imgLen+audioLen)){
+		start=setInterval(function() {
+		  info();
+		  update();
+		  draw();
+		  time = new Date().getTime();
+		}, Math.floor(1000 / FPS));
 
+		$("#info").show();
+		$("#dialog").hide();
+		$("#loading").hide();
+	}else{
+		$("#loading").show();
+	}
+}

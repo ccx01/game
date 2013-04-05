@@ -4,7 +4,7 @@ var Sound = (function($) {
   var sounds = {};
 
   function loadSoundChannel(name) {
-    var sound = $('<audio />').get(0);
+    var sound = $('<audio preload="auto" />').get(0);
     sound.src = soundPath + name + format;
 
     return sound;
@@ -23,6 +23,11 @@ var Sound = (function($) {
   }
 
   return $.extend(Sound, {
+    load: function(name, loadedCallback) {
+      var audio = loadSoundChannel(name);
+      audio.addEventListener("canplaythrough", loadedCallback(), false);
+    },
+
     play: function(name, maxChannels) {
       // Note: Too many channels crash browsers
       maxChannels = maxChannels || 4;
