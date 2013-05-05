@@ -42,3 +42,30 @@ function animation(obj,sx,sy,w,h){
     obj.width=w||obj.width;
     obj.height=h||obj.height;
 }
+
+function update() {
+  player.forEach(function(p){
+    p.control();
+    p.update();
+  });
+
+  enemies.forEach(function(enemy) {
+    enemy.update();
+  });
+
+  handleCollisions();
+
+}
+
+function draw() {
+  canvas.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+  player.forEach(function(p){
+    p.draw();
+  });
+
+  enemies.forEach(function(enemy) {
+    enemy.draw();
+  });
+
+}

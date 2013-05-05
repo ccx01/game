@@ -23,12 +23,12 @@
     </div>
 
     <div id="dialog">
-        <div class="left"><img src="" /></div>
-        <div class="right"><img src="" /></div>
+        <div class="left"></div>
+        <div class="right"><img src="images/avatar/ming.png" style="width:361px;height:445px" ></div>
         <div class="content">
             <div class="words">
-                <!-- <img src="images/ui/tipLc.png" / >X1 = 攻击！<br>
-                <img src="images/ui/tipRc.png" / >X1 = 移动！<br> -->
+                <img src="images/ui/tipLc.png" / >X1 = 攻击！<br>
+                <img src="images/ui/tipRc.png" / >X1 = 移动！<br>
             </div>
             <div class="prev">&ltprev</div>
             <div class="next">next&gt</div>
@@ -39,12 +39,16 @@
   </body>
 </html>
     <script language="javascript" src="../jquery.min.js" type="text/javascript"></script>
-    <script language="javascript" src="js/jquery.hotkeys.js" type="text/javascript"></script>
-    <script language="javascript" src="js/key_status.js" type="text/javascript"></script>
-    <script language="javascript" src="js/util.js" type="text/javascript"></script>
-    <script language="javascript" src="js/sprite.js" type="text/javascript"></script>
-    <script language="javascript" src="js/sound.js" type="text/javascript"></script>
-    <script language="javascript" src="js/func.js" type="text/javascript"></script>
-    <script language="javascript" src="js/class.js" type="text/javascript"></script>
-    <script language="javascript" src="js/init.js" type="text/javascript"></script>
-    <script language="javascript" src="js/gameStart.js" type="text/javascript"></script>
+<script>
+$.getJSON( "test.js", function( json ) {
+   console.log( json.people[1].email );
+ })
+.done(function(json) {
+  console.log(json);
+})
+.fail(function( jqxhr, textStatus, error ) {
+  var err = textStatus + ', ' + error;
+  console.log( "Request Failed: " + err);
+});
+
+</script>

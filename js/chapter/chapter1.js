@@ -1,64 +1,27 @@
-  /* 对话期间继续加载 */
-var level = [
-["characters/ochi","characters/fs"],
-["atk","beaten","hit"]
-];
-var loaded = 0,
-    imgLen = level[0].length,
-    audioLen = level[1].length;
-for(var m=0;m<imgLen;m++){
-  Sprite(level[0][m],0,0,preloading);
-}
-for(var n=0;n<audioLen;n++){
-  Sound.load(level[1][n],preloading);
-}
+/* preload images and audio */
+var resource = [
+  ['characters/ochi','characters/fs'],
+  ['atk','beaten','hit']
+  ];
 
-function preloading(){
-  loaded++;
-  $("#loading div").stop().animate({width:loaded/(imgLen+audioLen)*100+"%"});
-}
+/* dialog */
+var dialog={
+'begin':[
+  { 'avatar': 'ming.png', 'position':'.right', 'words': '<img src="images/ui/tipLc.png" / >X1 = 攻击！<br><img src="images/ui/tipRc.png" / >X1 = 移动！' },
+  { 'words': '如果浏览器安装了鼠标手势之类的扩展，可以<img src="images/ui/tipRc.png" / >X2 = 移动！' },
+  { 'avatar': 'card.png', 'position':'.right','words': '<div class="start" onclick="start();">start</div>' }
+],
+'win':[
+  { 'avatar': 'ming.png', 'position':'.right', 'words': 'you win！' },
+  { 'words': '如果浏览器安装了鼠标手势之类的扩展，可以<img src="images/ui/tipRc.png" / >X2 = 移动！' }
+],
+'lost':[
+  { 'avatar': 'ming.png', 'position':'.right', 'words': 'you lost！' },
+  { 'words': '如果浏览器安装了鼠标手势之类的扩展，可以<img src="images/ui/tipRc.png" / >X2 = 移动！' }
+]
+};
 
-function info(){
-  //$(".info").text("ochi:hp "+ochi.HP+" action "+ochi.action+" summon: hp "+node[0].HP+" angry "+node[0].angry+" mode "+node[0].mode);
-
-  if(node[0].HP==0){
-    alert("you win!");
-    clearInterval(start);
-  }
-  if(ochi.HP==0){
-    alert("you lose!");
-    clearInterval(start);
-  }
-}
-
-function update() {
-  player.forEach(function(p){
-    p.control();
-    p.update();
-  });
-
-  enemies.forEach(function(enemy) {
-    enemy.update();
-  });
-
-  handleCollisions();
-
-}
-
-function draw() {
-  canvas.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-  player.forEach(function(p){
-    p.draw();
-  });
-
-  enemies.forEach(function(enemy) {
-    enemy.draw();
-  });
-
-}
-
-var handleCollisions = function (){
+handleCollisions = function (){
 
   enemies.forEach(function(enemy) {
     if (collides(enemy, ochi)) {
@@ -107,7 +70,7 @@ var handleCollisions = function (){
 
 }
 
-var player = [];
+player = [];
 //Ochi 奥兹
   var ochi = entity();  
   player.push(ochi);
@@ -234,6 +197,12 @@ var player = [];
             this.sprite.sourceX+=this.width;          
         }*/
     }
+    if(this.HP<=0){
+      //alert("you lost!");
+      clearInterval(game);
+      $("#dialog").show();
+      words(dialog["lost"]);
+    }
   };
   ochi.explode=function(x,y){
     this.speed=10;
@@ -261,7 +230,7 @@ var player = [];
 
 //monster
 
-  var enemies = [];
+  enemies = [];
 
   var node=[],
       weak=3,
@@ -367,47 +336,9 @@ var player = [];
       this.x += this.xVelocity;  
       this.y += this.yVelocity;
 
+      if(this.HP<=0){
+        clearInterval(game);
+        $("#dialog").show();
+        words(dialog["win"]);
+      }
   }
-
-
-/* for checking image position */
-/*var testIMG = entity();
-testIMG.sprite = Sprite("characters/ochi");
-player.push(testIMG);
-  testIMG.control=function(){
-        if (keydown.q) {
-          console.log(this.sprite.sourceX+" "+this.sprite.sourceY+" "+this.width+" "+this.height);
-        }
-
-        if (keydown.a) {
-          this.sprite.sourceX--; 
-        }
-        if (keydown.d) {
-          this.sprite.sourceX++;       
-        } 
-        if (keydown.w) {
-          this.sprite.sourceY++;
-        }
-        if (keydown.s) {
-          this.sprite.sourceY--;
-        }
-
-        if (keydown.up) {
-          this.height++; 
-        }
-        if (keydown.down) {
-          this.height--;       
-        } 
-        if (keydown.left) {
-          this.width--;
-        }
-        if (keydown.right) {
-          this.width++;
-        }
-
-  };
-  testIMG.draw = function() {
-    canvas.fillStyle = "#998";
-    canvas.fillRect(this.x, this.y, this.width, this.height);
-    this.sprite.draw(canvas, this.x, this.y, this.width, this.height);
-  };*/
