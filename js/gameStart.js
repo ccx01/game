@@ -1,63 +1,70 @@
-var time = 0;
-
 var CANVAS_WIDTH = 900;
 var CANVAS_HEIGHT = 600;
 
-var canvasElement = $("<canvas width='" + CANVAS_WIDTH +"' height='" + CANVAS_HEIGHT + "' id='myCanvas' ></canvas>");
-var canvas = canvasElement.get(0).getContext("2d");
+$("#stage").css({
+	"width":CANVAS_WIDTH,
+	"height":CANVAS_HEIGHT,
+	"margin-left":-CANVAS_WIDTH/2,
+	"margin-top":-CANVAS_HEIGHT/2
+});
+var myCanvas=$("#myCanvas").get(0);
+	myCanvas.width=CANVAS_WIDTH;
+	myCanvas.height=CANVAS_HEIGHT;
+var canvas = myCanvas.getContext("2d");
 
-canvasElement.appendTo('#stage');
+var camera = {
+	x:0,
+	y:0,
+	update:function(center,stage){
+		/*******camera*******/
+		this.x = center.x-CANVAS_WIDTH/2;	//lock the camera
+		this.x = this.x.clamp(0, map.width-CANVAS_WIDTH);
+		this.y = center.y-CANVAS_HEIGHT/2;
+		this.y = this.y.clamp(0, map.height-CANVAS_HEIGHT);
+
+		$(stage).css({
+			'background-position-x': -camera.x+'px',
+			'background-position-y': -camera.y+'px'
+		});
+
+	}
+}
 
 var mouseX = 0,
-    mouseY = 0;
-$("#stage").mousemove(function(e){
-    mouseX = e.pageX - this.offsetLeft,
-    mouseY = e.pageY - this.offsetTop; 
+	mouseY = 0;
+$("#stage").mousemove(function(e) {
+	mouseX = e.pageX - this.offsetLeft + camera.x,
+	mouseY = e.pageY - this.offsetTop + camera.y;
 });
 
-var FPS = 30;
+function setSize(w,h){
+	CANVAS_WIDTH = w;
+	CANVAS_HEIGHT = h;
 
-init(1);
+	$("#stage").animate({
+		"width":CANVAS_WIDTH,
+		"height":CANVAS_HEIGHT,
+		"margin-left":-CANVAS_WIDTH/2,
+		"margin-top":-CANVAS_HEIGHT/2
+	});
+	myCanvas.width=CANVAS_WIDTH;
+	myCanvas.height=CANVAS_HEIGHT;
 
+	camera = {
+		x:0,
+		y:0,
+		update:function(center,stage){
+			this.x = center.x-CANVAS_WIDTH/2;
+			this.x = this.x.clamp(0, map.width-CANVAS_WIDTH);
+			this.y = center.y-CANVAS_HEIGHT/2;
+			this.y = this.y.clamp(0, map.height-CANVAS_HEIGHT);
 
-/* for checking image position */
-/*var testIMG = entity();
-testIMG.sprite = Sprite("characters/ochi");
-player.push(testIMG);
-  testIMG.control=function(){
-        if (keydown.q) {
-          console.log(this.sprite.sourceX+" "+this.sprite.sourceY+" "+this.width+" "+this.height);
-        }
+			$(stage).css({
+				'background-position-x': -camera.x+'px',
+				'background-position-y': -camera.y+'px'
+			});
 
-        if (keydown.a) {
-          this.sprite.sourceX--;
-        }
-        if (keydown.d) {
-          this.sprite.sourceX++;       
-        } 
-        if (keydown.w) {
-          this.sprite.sourceY++;
-        }
-        if (keydown.s) {
-          this.sprite.sourceY--;
-        }
+		}
+	}
 
-        if (keydown.up) {
-          this.height++; 
-        }
-        if (keydown.down) {
-          this.height--;       
-        } 
-        if (keydown.left) {
-          this.width--;
-        }
-        if (keydown.right) {
-          this.width++;
-        }
-
-  };
-  testIMG.draw = function() {
-    canvas.fillStyle = "#998";
-    canvas.fillRect(this.x, this.y, this.width, this.height);
-    this.sprite.draw(canvas, this.x, this.y, this.width, this.height);
-  };*/
+}

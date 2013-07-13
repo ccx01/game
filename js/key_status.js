@@ -14,9 +14,9 @@ $(function() {
     keydown[keyName(event)] = false;
   });
 
-  $(document).on('contextmenu',function(event){ 
-    return false; 
-  }); 
+  // $(document).on('contextmenu',function(event){ 
+  //   return false; 
+  // }); 
 
   $(document).on("mousedown", function(event) {
     switch(event.which){
