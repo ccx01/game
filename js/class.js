@@ -1,9 +1,10 @@
 var object = [];
+var enemyPool = [];
+var collidable = [];	//可碰撞物
+var obstacles = [];
 // var map = [];
-
 function entity() {
 	var I = {};
-
 	I.age = 0;
 	I.active = true;
 	I.timer = 0; //计时用
@@ -13,10 +14,15 @@ function entity() {
 	I.x = 0;
 	I.y = 0;
 	I.angle = 0;
+	/*for drawing*/
 	I.width = 32;
 	I.height = 32;
+	/*for collide*/
+	I.OBBwidth = 32;
+	I.OBBheight = 32;
 	I.speed = 2;
 	I.sprite = Sprite("model.png");
+	I.bounce={};
 	I.draw = function() {
 		canvas.save();
 		canvas.translate(this.x-camera.x, this.y-camera.y);
@@ -24,6 +30,7 @@ function entity() {
 		this.sprite.draw(canvas, -this.width / 2, -this.height / 2, this.width, this.height, this.flash,this.flashGap);
 		canvas.restore();
 		this.update();
+		this.inBounds();
 	};
 	I.imgSprite = function(arr) {	//arr:[sx, sy, w, h]
 		this.sprite.sourceX = arr[0];
@@ -43,14 +50,13 @@ function entity() {
 	I.update = function() {		//for customize
 		/*this.x = this.x.clamp(0, CANVAS_WIDTH - this.width);
 		this.y = this.y.clamp(0, CANVAS_HEIGHT - this.height);*/
-		this.angle = Math.atan2(mouseY + this.y, mouseX + this.x);
+		// this.angle = Math.atan2(mouseY + this.y, mouseX + this.x);
 	};
-	I.inBounds = function() {
-		return I.x >= -100 && I.x <= CANVAS_WIDTH + 100 && I.y >= -100 && I.y <= CANVAS_HEIGHT + 100;
+	I.inBounds = function(x,y) {
+		//return I.x >= -100 && I.x <= CANVAS_WIDTH + 100 && I.y >= -100 && I.y <= CANVAS_HEIGHT + 100;
 	};
 	return I;
 };
-
 /**********expand**********/
 var effect = [];
 function nonentity(age, x, y, speed, angle) {
@@ -83,7 +89,7 @@ function nonentity(age, x, y, speed, angle) {
 }
 
 var sign = [];
-function mark(age, x, y) {
+function mouseIcon(age, x, y) {
 	var I = entity();
 	I.age = age||0;
 	I.x = x||0;
@@ -107,6 +113,15 @@ function mark(age, x, y) {
 			});
 		}	
 	}
-
 	return I;
 }
+
+/*function generateObstacle(x,y,width,height,angle) {
+	var obstacle=entity();
+	obstacle.x=x;
+	obstacle.y=y;
+	obstacle.OBBwidth=obstacle.width=width;
+	obstacle.OBBheight=obstacle.height=height;
+	obstacle.angle=angle;
+	obstacles.push(obstacle);
+}*/

@@ -1,6 +1,6 @@
 //Ochi 奥兹
 var ochi=entity();
-var uni=mark();	//mouse click
+var uni=mouseIcon();	//mouse click
 ochi.areaAtk=[];	//打击域
 //ochi.areaDef=[];	//受击域,模型太小，不需要受击域= =
 ochi.sprite=Sprite("characters/ochi.png");
@@ -69,16 +69,20 @@ ochi.stiff=function() {
 	//do nothing
 };
 ochi.bounce={
+	"active": false,
 	"timer": 0,
 	"speed": 5,
 	"cd": 1,
-	"angle":0,
+	"angle": 0,
 	"release":function() {
 		ochi.actionSprite("normal");
 		ochi.xVelocity=Math.cos(this.angle) * this.speed;
 		ochi.yVelocity=Math.sin(this.angle) * this.speed;
 		if (time - this.timer > this.cd) {
 			ochi.normal();
+			ochi.bounce.active = false;
+			ochi.bounce.speed = 1;
+			ochi.bounce.cd = 50;
 		} else {
 			ochi.x += ochi.xVelocity;
 			ochi.y += ochi.yVelocity;
@@ -99,11 +103,6 @@ ochi.manual=function() { //manual  if判断，可同时输入多指令
 	this.moveWorking();
 };
 ochi.moveWorking=function(){
-	if (keydown.leftClick&&this.mouseY!=mouseY&&this.mouseX!=mouseX) {
-		this.mouseY=mouseY;
-		this.mouseX=mouseX;
-		this.move=true;
-	}
 	if (this.move) {
 		this.actionSprite("walk");
 
@@ -122,10 +121,14 @@ ochi.moveWorking=function(){
 	}	
 }
 ochi.actionWorking=function() {
-	if (keydown.leftClick) {
-		uni=mark(500, mouseX, mouseY);
+	if (keydown.leftClick&&this.mouseY!=mouseY&&this.mouseX!=mouseX) {
+		uni=mouseIcon(500, mouseX, mouseY);
 		sign=[];
 		sign.push(uni);
+
+		this.mouseY=mouseY;
+		this.mouseX=mouseX;
+		this.move=true;
 	}	
 	switch (this.action) {
 		case "stiff":
@@ -133,12 +136,30 @@ ochi.actionWorking=function() {
 			break;
 		case "atk":
 			this.atk();
+			//攻击域碰撞判定
+			ochi.areaAtk.forEach(function(atk) {
+				enemyPool.forEach(function(emy) {
+					if (collides(emy, atk)) {
+						if(ochi.skillName=="uppercut"){
+							atk.hit=true;
+							atk.count=0;
+						}
+						emy.bounce.angle = Math.atan2(emy.y - ochi.y, emy.x - ochi.x);
+						emy.action = "bounce";
+						emy.hurt(ochi.damage);
+					}
+				});
+			});			
 			break;
-		case "bounce":
-			this.bounce.release();
-			break;
-		default:
-			this.manual();
+		// case "bounce":
+		// 	this.bounce.release();
+		// 	break;
+		default: //bounce & normal
+			if(this.bounce.active){
+				this.bounce.release();
+			}else{
+				this.manual();
+			}
 	}
 }
 
@@ -226,7 +247,7 @@ ochi.sprint = { //真空百裂碎击拳 Q
 		}
 	}
 }
-ochi.uppercut = { //回旋离心破牙拳 W
+ochi.uppercut = { //adogi W
 	"timer": 0,
 	"cd": 3000,
 	"damage": 3,
@@ -251,7 +272,7 @@ ochi.uppercut = { //回旋离心破牙拳 W
 					ochi.fountain=nonentity(300,ochi.x+20*ochi.xVelocity,ochi.y+20*ochi.yVelocity,10,ochi.angle);
 					ochi.fountain.sprite=Sprite("characters/ochi.png",150,85);
 					ochi.fountain.update = function() {
-						if(this.col){
+						if(this.hit){
 							var _this=this;
 							this.animation([
 								[247,64,30,54],
@@ -295,7 +316,7 @@ ochi.uppercut = { //回旋离心破牙拳 W
 		}
 	}
 }
-ochi.roundkick = { //灭神陀螺轮回脚 E
+ochi.roundkick = { //zaizaibologi E
 	"timer": 0,
 	"cd": 2000,
 	"damage": 1,
@@ -334,7 +355,8 @@ ochi.normal=function(){
 }
 /**********update**********/
 ochi.update=function() {
-	camera.update(ochi,"#stage");
 	this.buffWorking();
 	this.actionWorking();
 };
+/*******具有碰撞属性*******/
+collidable.push(ochi);

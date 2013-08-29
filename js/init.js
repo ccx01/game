@@ -1,5 +1,4 @@
 /* init */
-var handleCollisions = function() {}
 var time; //current time
 var loaded;
 var totalLen;
@@ -48,9 +47,36 @@ function preloading() {
 /* collision detection */
 
 function collides(a, b) {
-	OBB1 = new OBB(new Vector2(a.x, a.y), a.width, a.height, a.angle);
-	OBB2 = new OBB(new Vector2(b.x, b.y), b.width, b.height, b.angle);
+	OBB1 = new OBB(new Vector2(a.x, a.y), a.OBBwidth, a.OBBheight, a.angle);
+	OBB2 = new OBB(new Vector2(b.x, b.y), b.OBBwidth, b.OBBheight, b.angle);
 	return CollisionDetector.detectorOBBvsOBB(OBB1, OBB2);
+}
+
+function handleCollisions(){
+	for(var i=0;i<collidable.length-1;i++){
+		for(var j=i+1;j<collidable.length;j++){
+			if (collides(collidable[i], collidable[j])) {
+				var objA=collidable[i];
+				var objB=collidable[j];
+				objA.bounce.angle = Math.atan2(objA.y - objB.y, objA.x - objB.x);
+				objA.bounce.timer = time;
+				objA.bounce.active = true;
+				objB.bounce.angle = Math.atan2(objB.y - objA.y, objB.x - objA.x);
+				objB.bounce.timer = time;
+				objB.bounce.active = true;
+			}			
+		}
+		for(var k=0;k<obstacles.length;k++){
+			if (collides(collidable[i], obstacles[k])) {
+				var objA=collidable[i];
+				var objB=obstacles[k];
+				objA.bounce.angle = Math.atan2(objA.y - objB.y, objA.x - objB.x);
+				objA.bounce.timer = time;
+				objA.bounce.active = true;
+				objA.action = "bounce";
+			}					
+		}
+	}
 }
 
 /* canvas update */
@@ -69,15 +95,18 @@ function draw() {
 	effect.forEach(function(ef) {
 		ef.draw();
 	});
-
-	handleCollisions();
 }
+
+function result(){}
 
 function animate(now) {
 	if (!pause) {
 		fps = calculateFps(now);
+		camera.update();
+		handleCollisions();
 		clear();
 		draw();
+		result();
 		time = new Date().getTime();
 		requestId = requestAnimationFrame(animate);
 	}
@@ -93,6 +122,47 @@ function calculateFps(now) {
 	}
 
 	return fps;
+}
+
+/************CG***************/
+var CGinit=function(){
+	$(".tip").hide();
+	$("#cg").css({
+		"-webkit-animation":"none",
+		"width": 0,
+		"height": 0,
+		"top": "50%",
+		"left": "50%",
+		"margin-left": 0,
+		"margin-top": 0
+	});
+	$("#cg .content").css({
+		"background":"none"
+	}).html("");
+}
+$(".tip").click(function(){
+	CGstep++;
+    CG(CGstep);
+});
+var CGwidth,CGheight,CGstep=1;
+var CG = function(){}
+/*var WIN = function(){}
+var LOSE = function(){}*/
+var chapterInit = function(){}
+var CGcontent = function(w,h,time,auto){
+	$("#cg").animate({
+		"width": w,
+		"height": h,
+		"top": "50%",
+		"left": "50%",
+		"margin-left": -w/2,
+		"margin-top": -h/2
+	},time,function() {
+		if(auto){
+			CGstep++;
+			CG(CGstep);
+		}
+    });	
 }
 
 requestId = requestAnimationFrame(animate);
@@ -122,7 +192,6 @@ function stop(delay) {
 function menu() {
 	$("#stage").fadeOut();
 	$("#info").fadeOut();
-	$("#dialog").fadeOut();
 	$("#chapter").show();
 }
 

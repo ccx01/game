@@ -10,32 +10,15 @@ $("#stage").css({
 	'background-position': '0px 0px',
 	'background-repeat': 'no-repeat'
 });
-var map = {
-	'width':1900,
-	'height':1000
-}
+map.width=1900;
+map.height=1000;
+obstacles=[];
 
-var CGwidth,CGheight,CGstep=1;
-var CGcontent = function(w,h,time,auto){
-	$("#cg").animate({
-		"width": w,
-		"height": h,
-		"top": "50%",
-		"left": "50%",
-		"margin-left": -w/2,
-		"margin-top": -h/2
-	},time,function() {
-		if(auto){
-			CGstep++;
-			CG(CGstep);
-		}
-    });	
-}
-var CG = function(step){
+CGstep=1;
+CG = function(step){
 	switch(step){	
 		case 1:
-			CGstep=1;
-			$(".tip").off().hide();
+			$(".tip").hide();
 			$("#cg .content").html("");
 			$(".shadow,#cg").fadeIn();
 			CGwidth=200;
@@ -90,10 +73,7 @@ var CG = function(step){
 			});
 			CGcontent(CGwidth,CGheight,100);
 
-			$(".tip").show().click(function(){
-					CGstep++;
-			    	CG(CGstep);
-			});
+			$(".tip").show();
 		break;
 		case 10:
 			$("#cg .content").css({
@@ -120,9 +100,56 @@ var CG = function(step){
 				"background-image":"url(images/chapter/chapter1/op1_8.png)"
 			});
 		break;
-		default:
+		case 100: 	//win
+			CGwidth=900;
+			CGheight=600;
+			$(".shadow,#cg").fadeIn("normal",function(){
+				stop();
+				$("#stage").hide();
+			});
+			$("#cg .content").css({
+				"background-image":"url(images/chapter/chapter1/win1.png)",
+				"background-color":"#fff"
+			});
+			CGcontent(CGwidth,CGheight,500);
+		break;
+		case 101:
+			CGwidth=0;
+			CGheight=0;
+			$("#cg .content").css({
+				"background":"none"
+			}).html("");
+			$(".shadow,#cg").fadeOut(1000);
+			menu();
+			$(".chapter2").removeClass("locked");
+		break;
+		case 200: //lose
+			CGwidth=900;
+			CGheight=600;
+			$(".shadow,#cg").fadeIn("normal",function(){
+				stop();
+				$("#stage").hide();
+			});
+			$("#cg .content").css({
+				"background-image":"url(images/chapter/chapter1/lose1.png)",
+				"background-color":"#fff"
+			});
+			CGcontent(CGwidth,CGheight,1000);
+		break;
+		case 201:
+			CGwidth=0;
+			CGheight=0;
+			$("#cg .content").css({
+				"background":"none"
+			}).html("");
+			$(".shadow,#cg").fadeOut(1000);
+			menu();
+		break;
+		default: 	//start
 			$(".tip").hide();
-			$("#cg").animate({
+			$("#cg").css({
+				"-webkit-animation":"none"
+			}).animate({
 				"width": 300,
 				"height": 95,
 				"top": 150,
@@ -137,12 +164,14 @@ var CG = function(step){
 	}
 }
 
-var WIN = function(step){
+/*WIN = function(step){
 	switch(step){	
 		case 1:
 			CGwidth=900;
 			CGheight=600;
-			$(".shadow,#cg").fadeIn();
+			$(".shadow,#cg").fadeIn("normal",function(){
+				stop();
+			});
 			$("#cg .content").css({
 				"background-image":"url(images/chapter/chapter1/win1.png)",
 				"background-color":"#fff"
@@ -161,12 +190,14 @@ var WIN = function(step){
 	}
 }
 
-var LOSE = function(step){
+LOSE = function(step){
 	switch(step){	
 		case 1:
 			CGwidth=900;
 			CGheight=600;
-			$(".shadow,#cg").fadeIn();
+			$(".shadow,#cg").fadeIn("normal",function(){
+				stop();
+			});
 			$("#cg .content").css({
 				"background-image":"url(images/chapter/chapter1/lose1.png)",
 				"background-color":"#fff"
@@ -182,7 +213,7 @@ var LOSE = function(step){
 			$(".shadow,#cg").fadeOut(1000);
 			menu();
 	}
-}
+}*/
 
 $.when(
 $.ajax({
@@ -194,16 +225,21 @@ $.ajax({
 	url: "js/characters/cos.js",
 	async: false,
 	dataType: "script"
-})).done(function() {
+})
+);
 
-});
-
-var chapterInit = function(){
-	/* load object */
+chapterInit = function(){
+	object=[];
+	effect=[];
+	collidable=[];
+	enemyPool=[];
 	object.push(ochi);
+	collidable.push(ochi);
 	$("#player").addClass("ochi");
 	for (var i = 0; i < len; i++) {
 	    object.push(node[i]);
+		collidable.push(node[i]);
+	    enemyPool.push(node[i]);
 	}
 	$("#enemy").addClass("cos");
 	node[0].target=ochi;
@@ -217,25 +253,25 @@ var chapterInit = function(){
 	    "width": "100%"
 	});
 
-
+	camera.center=ochi;
 	start();
 }
 
-handleCollisions = function() {
+result = function() {
 
-	node.forEach(function(enemy) {
+	/*node.forEach(function(enemy) {
 		if (collides(enemy, ochi)) {
 			if (ochi.action != "atk") {
 				ochi.bounce.speed = 5;
 				ochi.bounce.angle = Math.atan2(ochi.y - node[0].y, ochi.x - node[0].x);
 				ochi.bounce.timer = time;
 				ochi.bounce.cd = 50;
-				ochi.action = "bounce";
+				ochi.bounce.active = true;
 			}
 		}
-	});
+	});*/
 
-	ochi.areaAtk.forEach(function(atk) {
+	/*ochi.areaAtk.forEach(function(atk) {
 		if (collides(node[weak], atk)) {
 			node[0].hurt(ochi.damage);
 		}
@@ -243,7 +279,7 @@ handleCollisions = function() {
 			if (collides(enemy, atk)) {
 				if(ochi.skillName=="uppercut"){
 					node[0].shake(1000);
-					atk.col=true;
+					atk.hit=true;
 					atk.count=0;
 				}else{
 					node[0].shake(200);
@@ -251,43 +287,36 @@ handleCollisions = function() {
 				enemy.coll();
 			}
 		});		
-	});
+	});*/
 
-	if (collides(node[0], ochi)) {
+	/*if (collides(node[0], node[0].target)) {
 		// Sound.play("beaten");
 		node[0].bite=true;
 
-		ochi.bounce.speed = 10;
-		ochi.bounce.angle = Math.atan2(ochi.y - node[0].y, ochi.x - node[0].x);
-		ochi.bounce.timer = time;
-		ochi.bounce.cd = 200;
-		ochi.action = "bounce";
+		node[0].target.bounce.speed = 10;
+		node[0].target.bounce.angle = Math.atan2(node[0].target.y - node[0].y, node[0].target.x - node[0].x);
+		node[0].target.bounce.timer = time;
+		node[0].target.bounce.cd = 200;
+		node[0].target.bounce.active = true;	//通常只有在正常行走状态下有效
+		node[0].target.action = "bounce";		//强行激活bounce状态
 
 		node[0].angry -= 1;
-		ochi.hurt(1);
-	}
-
-	if(ochi.HP<=0){
-		CGstep=1;
-		setTimeout('LOSE(CGstep)',1000);
-		$(".tip").off().click(function(){
-			CGstep++;
-	    	LOSE(CGstep);
-		}).show();
-		stop();
-	}
-
+		node[0].target.hurt(1);
+	}*/
 	if(node[0].HP<=0){
-		CGstep=1;
-		setTimeout('WIN(CGstep)',1000);
-		$(".tip").off().click(function(){
-			CGstep++;
-	    	WIN(CGstep);
-		}).show();
+		result=function(){}
+		CGstep=100;
+		CG(CGstep);
+		$(".tip").show();
 		stop();
 	}
-
+	if(ochi.HP<=0){
+		result=function(){}
+		CGstep=200;
+		CG(CGstep);
+		$(".tip").show();
+	}
 }
-
+CGinit();
 CG(CGstep);
 // chapterInit();

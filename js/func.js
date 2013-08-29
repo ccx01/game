@@ -47,7 +47,6 @@
 	window.Vector2 = Vector2;
 
 	var CollisionDetector = {
-
 		detectorOBBvsOBB: function(OBB1, OBB2) {
 			var nv = OBB1.centerPoint.sub(OBB2.centerPoint);
 			var axisA1 = OBB1.axes[0];
@@ -59,7 +58,6 @@
 			var axisB2 = OBB2.axes[1];
 			if (OBB1.getProjectionRadius(axisB2) + OBB2.getProjectionRadius(axisB2) <= Math.abs(nv.dot(axisB2))) return false;
 			return true;
-
 		}
 	}
 
@@ -72,7 +70,6 @@
 		var r = new RegExp(this.S + e + this.S);
 		return (r.test(this.S + this.join(this.S) + this.S));
 	}
-
 	Array.prototype.indexOf = function(val) {
 		for (var i = 0; i < this.length; i++) {
 			if (this[i] == val) return i;

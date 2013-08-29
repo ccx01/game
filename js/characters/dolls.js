@@ -18,14 +18,13 @@ dolls.bounce={
 	"cd": 100,
 	"angle":0,
 	"release":function() {
-		dolls.xVelocity=Math.cos(this.angle) * this.speed;
-		dolls.yVelocity=Math.sin(this.angle) * this.speed;
 		if (time - this.timer > this.cd) {
 			dolls.action="static";
-		}else if((time-this.timer)%20<5) {
-			dolls.xVelocity*=-1;
-			dolls.yVelocity*=-1;
+        	dolls.coll();
+			this.timer = new Date().getTime();
 		}
+		dolls.xVelocity=Math.cos(this.angle) * this.speed;
+		dolls.yVelocity=Math.sin(this.angle) * this.speed;
 		dolls.x += dolls.xVelocity;
 		dolls.y += dolls.yVelocity;
 	}
@@ -66,3 +65,4 @@ dolls.update=function(){
 	this.x = this.x.clamp(100, 900);
 	this.y = this.y.clamp(100, 500);
 }
+collidable.push(dolls);

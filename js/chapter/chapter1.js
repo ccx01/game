@@ -6,31 +6,29 @@ var resource = [
 
 /*********map init*********/
 $("#stage").css({
-	'background':'url("images/map/bg1_0.jpg")',
+	'background':'url("images/map/bg1_0.png")',
 	'background-position': '0px 0px',
 	'background-repeat': 'no-repeat'
 });
-var map = {
-	'width':900,
-	'height':600
+map.width = 900;
+map.height = 600;
+obstacles = [];
+var boundary = function(){
+	if(this.x-200>this.y){
+		this.y = this.y.clamp(0, this.x-200);
+		this.x = this.x.clamp(0, this.y+200);
+	}
 }
+/*generateObstacle(900,0,900,450,Math.atan2(1,2));
+generateObstacle(900,300,600,180,Math.atan2(1,0));
+generateObstacle(900,600,900,450,Math.atan2(-1,2));*/
 
-var CGwidth,CGheight,CGstep=1;
-var CGcontent = function(w,h,time){
-	$("#cg").animate({
-		"width": w,
-		"height": h,
-		"top": "50%",
-		"left": "50%",
-		"margin-left": -w/2,
-		"margin-top": -h/2
-	},time);	
-}
-var CG = function(step){
+/************CG***********/
+CGstep=1;
+CG = function(step){
 	switch(step){	
 		case 1:
-			$(".tip").off();
-			$(".tip").hide();
+			$(".tip").show();
 			$(".shadow,#cg").fadeIn();
 			CGwidth=900;
 			CGheight=600;
@@ -41,15 +39,19 @@ var CG = function(step){
 				"background-color":"#fff"
 			});
 			CGcontent(CGwidth,CGheight,1000);
-
-			$("#cg").append('<span class="tip">Click<span id="indicator"></span></span>');
-			$(".tip").click(function(){
-			    	CG(2);
+		break;
+		case 100:
+			$("#info").fadeOut();
+			$("#stage").fadeOut(1000,function(){
+				init(1.1);
+				stop();
 			});
 		break;
 		default:
 			$(".tip").hide();
-			$("#cg").animate({
+			$("#cg").css({
+				"-webkit-animation":"none"
+			}).animate({
 				"width": 300,
 				"height": 95,
 				"top": 150,
@@ -61,16 +63,15 @@ var CG = function(step){
 				"background":"none"
 			}).html("鼠标左键移动，按键Q W E攻击<br>干掉那个红色的家伙");
 			chapterInit();
-			$(".tip").off();
 	}
 }
-var WIN = function(){
-	stop();
+/*WIN = function(){
 	$("#info").fadeOut();
 	$("#stage").fadeOut(1000,function(){
 		init(1.1);
+		stop();
 	});
-}
+}*/
 
 $.when(
 $.ajax({
@@ -85,60 +86,47 @@ $.ajax({
 })
 );
 
-var chapterInit = function(){
+chapterInit = function(){
 	/* load object */
+	object=[];
+	effect=[];
+	enemyPool=[];
+	collidable=[];
 	object.push(ochi);
 	object.push(dolls);
+	collidable.push(ochi);
+	collidable.push(dolls);
+	enemyPool.push(dolls);
 	$("#player").addClass("ochi");
-	    $(".ochi .avatar img").attr("src","images/avatar/ochi/p1.png")
+		$(".ochi .avatar img").attr("src","images/avatar/ochi/p1.png")
 		$(".ochi .hp div").animate({
-	            "width": "10%"
-	    });
-	ochi.x=120;
+				"width": "10%"
+		});
+	ochi.x=100;
 	ochi.y=300;
 	dolls.HP=5;
-	dolls.x=720;
+	dolls.x=420;
 	dolls.y=300;
 	$("#enemy").addClass("dolls");
-	    $(".dolls .avatar img").attr("src","images/avatar/dolls.png")
+	$(".dolls .avatar img").attr("src","images/avatar/dolls.png")
 	var tHP=dolls.HP / dolls.init.HP * 100;
-        $(".dolls .hp div").animate({
-            "width": tHP + "%"
-        });
-	start();	
-}
-
-handleCollisions = function() {
-	ochi.areaAtk.forEach(function(atk) {
-		if (collides(dolls, atk)) {
-			if (ochi.action == "atk") {
-				if(ochi.skillName=="uppercut"){
-					atk.col=true;
-					atk.count=0;
-				}
-				if (time - dolls.bounce.timer > 100) {
-					dolls.bounce.angle = Math.atan2(dolls.y - ochi.y, dolls.x - ochi.x);
-					dolls.bounce.timer = time;	
-					dolls.action = "bounce";
-					dolls.coll();
-				}
-				dolls.hurt(1);
-			}
-		}
+	$(".dolls .hp div").animate({
+		"width": tHP + "%"
 	});
-	if (collides(dolls, ochi)) {
-		if (ochi.action != "atk") {
-			ochi.bounce.speed = 1;
-			ochi.bounce.angle = Math.atan2(ochi.y - dolls.y, ochi.x - dolls.x);
-			ochi.bounce.timer = time;
-			ochi.bounce.cd = 50;
-			ochi.action = "bounce";
-		}
-	}
-	if(dolls.HP<1){
-		CGstep=1;
-	    WIN(CGstep);
-	}
+	/*****map****/
+	ochi.inBounds = boundary;
+	dolls.inBounds = boundary;
+	/******camera*****/
+	camera.center = ochi;
+	start();
 }
 
-CG(1);
+result = function() {
+	if(dolls.HP<1){
+		CGstep=100;
+		CG(CGstep);
+		result=function(){}
+	}
+}
+CGinit();
+CG(CGstep);
